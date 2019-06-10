@@ -2,7 +2,7 @@ from NeuralNetwork import *
 
 class Player:
     def __init__(self, sign='O'):
-        self.nn = NeuralNetwork(9, 27, 9)
+        self.nn = NeuralNetwork(9, 9, 9)
         self.sign = sign
     
     def mutate(self, chance, delta):

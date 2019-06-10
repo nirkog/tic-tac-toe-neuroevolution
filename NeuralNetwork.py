@@ -7,8 +7,9 @@ def mutate_weights(weights, chance, delta):
     for i in range(weights.shape[0]):
         for j in range(weights.shape[1]):
             if np.random.rand(1, 1)[0][0] <= chance:
-                sign = -1 if np.random.rand(1, 1)[0][0] > 0.5 else 1
-                weights[i][j] += sign * delta
+                sign = -1.0 if np.random.rand(1, 1)[0][0] > 0.5 else 1.0
+                change = np.random.rand(1, 1)[0][0] * delta * sign
+                weights[i][j] += change
 
 class NeuralNetwork:
     def __init__(self, input_count, hidden_count, output_count):

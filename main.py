@@ -2,6 +2,8 @@ import copy
 import time
 import pickle
 from operator import attrgetter, itemgetter
+import matplotlib.pyplot as plt
+import sys
 
 from Board import *
 from Player import *
@@ -10,10 +12,10 @@ from RandomAI import *
 NUM_PLAYERS = 100
 ITERATIONS = 100
 GAMES_EACH_ROUND = 150
-SELECT_PERCENTAGE = 0.35
-MUTATION_CHANCE = 0.03
-MUTATION_DELTA = 0.1
-MUTATION_RATE = 0.8
+SELECT_PERCENTAGE = 0.15
+MUTATION_CHANCE = 0.15
+MUTATION_DELTA = 0.2
+MUTATION_ROUNDS = 5
 
 players = []
 wins = {}
@@ -48,10 +50,11 @@ def compete_players():
                     player2.play(board)
                     turn = 1
                 
+                #moves_played += 1
                 #board.print_state()
             
             if board.is_full():
-                wins[i] += 0.25
+                wins[i] += 0.4
                 #print('TIE!')
             elif board.check_for_win() == 'X':
                 wins[i] += 1
@@ -77,11 +80,12 @@ def select_players():
 def mutate_players():
     init_len = len(players)
 
-    for i in range(len(players)):
-        players.append(players[i])
-        wins[i + init_len] = 0
-        if np.random.rand(1, 1)[0][0] < MUTATION_RATE:
-            players[i + init_len - 1].mutate(MUTATION_CHANCE, MUTATION_DELTA)
+    for x in range(MUTATION_ROUNDS):
+        base_len = init_len * (x + 1)
+        for i in range(int(SELECT_PERCENTAGE * NUM_PLAYERS)):
+            players.append(players[i])
+            wins[i + base_len] = 0
+            players[-1].mutate(MUTATION_CHANCE, MUTATION_DELTA)
 
 def select_best():
     global wins, players
@@ -93,19 +97,40 @@ def select_best():
 
     return best_player
 
+def get_average_wins():
+    win_sum = 0
+    for count in wins.values():
+        win_sum += count
+    
+    return win_sum / len(wins)
+
 def main():
     best_player = None
+    iterations = []
+    wins_average = []
+    most_wins = []
 
-    for i in range(ITERATIONS):
+    num_iterations = ITERATIONS
+
+    if len(sys.argv) > 1:
+        num_iterations = int(sys.argv[1])
+    
+    print("STARTING " + str(num_iterations) + " ITERATIONS!")
+
+    for i in range(num_iterations):
         start_time = time.process_time()
 
         generate_players()
         compete_players()
 
-        if i % 10 == 0:
-            print(sorted(wins.items(), key=itemgetter(1), reverse=True))
+        iterations.append(i)
+        wins_average.append(get_average_wins())
+        most_wins.append(sorted(wins.items(), key=itemgetter(1), reverse=True)[0][1])
+        #if i % 10 == 0:
+            #print(sorted(wins.items(), key=itemgetter(1), reverse=True))
 
-        if i < ITERATIONS - 1:
+
+        if i < num_iterations - 1:
             select_players()
             mutate_players()
 
@@ -120,6 +145,10 @@ def main():
             out = open('save.pickle', 'wb')
             pickle.dump(best_player, out)
             out.close()
+
+    plt.plot(iterations, wins_average, 'r-')
+    plt.plot(iterations, most_wins, 'b-')
+    plt.show()
 
     best_player.set_sign('X')
     board = Board()
