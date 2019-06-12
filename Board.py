@@ -28,6 +28,15 @@ class Board:
                 to_print += ' '
             print(to_print)
     
+    def print_state_grid(self):
+        print('  a b c')
+        for i in range(3):
+            to_print = str(i + 1) + ' '
+            for j in range(3):
+                to_print += 'X' if self.state[i][j] == 1 else 'O' if self.state[i][j] == -1 else '-'
+                to_print += ' '
+            print(to_print)
+    
     def is_empty(self, pos):
         if self.state[pos[0]][pos[1]] == 0:
             return True

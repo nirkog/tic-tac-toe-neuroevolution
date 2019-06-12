@@ -1,12 +1,18 @@
 from NeuralNetwork import *
 
 class Player:
-    def __init__(self, sign='O'):
-        self.nn = NeuralNetwork(9, 9, 9)
+    def __init__(self, nn=None, sign='O'):
+        if nn == None:
+            self.nn = NeuralNetwork(9, 9, 9)
+        else:
+            self.nn = nn.duplicate()
+
         self.sign = sign
+        self.score = 0
+        self.fitness = 0
     
-    def mutate(self, chance, delta):
-        self.nn.mutate(chance, delta)
+    def mutate(self, chance):
+        self.nn.mutate(chance)
     
     def duplicate(self):
         return copy.deepcopy(self)
@@ -16,6 +22,9 @@ class Player:
     
     def get_sign(self):
         return self.sign
+    
+    def get_nn(self):
+        return self.nn
     
     def play(self, board):
         if board.is_full() == True:

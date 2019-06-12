@@ -1,15 +1,15 @@
 import numpy as np
+import copy
 
 def sigmoid(x):
     return 1 / (1 + np.exp(-x))
 
-def mutate_weights(weights, chance, delta):
+def mutate_weights(weights, chance):
     for i in range(weights.shape[0]):
         for j in range(weights.shape[1]):
             if np.random.rand(1, 1)[0][0] <= chance:
-                sign = -1.0 if np.random.rand(1, 1)[0][0] > 0.5 else 1.0
-                change = np.random.rand(1, 1)[0][0] * delta * sign
-                weights[i][j] += change
+                delta = np.random.normal(0, 0.1)
+                weights[i][j] += delta
 
 class NeuralNetwork:
     def __init__(self, input_count, hidden_count, output_count):
@@ -26,11 +26,11 @@ class NeuralNetwork:
 
         return a2
 
-    def mutate(self, chance, delta):
-        mutate_weights(self.hidden_weights, chance, delta)
-        mutate_weights(self.hidden_bias, chance, delta)
-        mutate_weights(self.output_weights, chance, delta)
-        mutate_weights(self.output_bias, chance, delta)
+    def mutate(self, chance):
+        mutate_weights(self.hidden_weights, chance)
+        mutate_weights(self.hidden_bias, chance)
+        mutate_weights(self.output_weights, chance)
+        mutate_weights(self.output_bias, chance)
     
     def print_weights(self):
         print('Hidden Weights')
