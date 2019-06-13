@@ -3,7 +3,7 @@ from NeuralNetwork import *
 class Player:
     def __init__(self, nn=None, sign='O'):
         if nn == None:
-            self.nn = NeuralNetwork(9, 9, 9)
+            self.nn = NeuralNetwork(9, 18, 9)
         else:
             self.nn = nn.duplicate()
 

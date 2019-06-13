@@ -95,14 +95,22 @@ def pick_best_player():
     return best
 
 def main():
+    global players
+
     best_player = Player()
     best_player.score = 0
+    best_generation = 0
 
     num_iterations = ITERATIONS
 
     if len(sys.argv) > 1:
         num_iterations = int(sys.argv[1])
     
+    if len(sys.argv) > 2:
+        generation_file = sys.argv[2]
+        with open(generation_file, 'rb') as f:
+            players = pickle.load(f)
+
     print("STARTING " + str(num_iterations) + " ITERATIONS!")
 
     generate_players()
@@ -116,18 +124,25 @@ def main():
         if generation_best.score > best_player.score:
             best_player = Player(generation_best.get_nn())
             best_player.score = generation_best.score
+            best_generation = i
 
         generate_next_generation()
 
         end_time = time.process_time()
         elapsed_time = end_time - start_time
 
-        print("ITERATION NUMBER " + str(i + 1) + " TOOK " + str(elapsed_time) + " SECONDS.")
+        print("ITERATION NUMBER " + str(i + 1) + " TOOK " + str(elapsed_time) + " SECONDS. BEST SCORE WAS " + str(best_player.score) + "/" + str(GAMES_EACH_ROUND) + " FROM GENERATION " + str(best_generation))
     
     print("BEST PLAYER SCORE " + str(best_player.score) + "/" + str(GAMES_EACH_ROUND))
 
     with open('save.pickle', 'wb') as save_file:
         pickle.dump(best_player, save_file)
+    
+    with open('save_generation.pickle', 'wb') as save_file:
+        for i in range(NUM_PLAYERS):
+            players[i].score = 0
+            players[i].fitness = 0
+        pickle.dump(players, save_file)
     
 
 if __name__ == '__main__':
