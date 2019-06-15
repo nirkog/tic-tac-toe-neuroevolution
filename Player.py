@@ -30,14 +30,10 @@ class Player:
         if board.is_full() == True:
             return
         
-        state = board.get_state_flattened()
-
         if self.sign == 'O':
-            for i in range(9):
-                if state[0][i] == 1:
-                    state[0][i] == -1
-                elif state[0][i] == -1:
-                    state[0][i] == 1
+            state = board.get_state_flipped_flattened()
+        else:
+            state = board.get_state_flattened()
 
         prediction = self.nn.predict(state)
         prediction = prediction.reshape((3, 3))

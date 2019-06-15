@@ -1,4 +1,5 @@
 import numpy as np
+import copy
 
 class Board:
     def __init__(self):
@@ -15,10 +16,30 @@ class Board:
         self.state[pos[0]][pos[1]] = -1
     
     def get_state(self):
-        return self.state
+        copy_state = copy.deepcopy(self.state)
+        return copy_state
+    
+    def get_state_flipped(self):
+        copy_state = []
+
+        for i in range(3):
+            copy_state.append([])
+            for j in range(3):
+                if self.state[i][j] == 1:
+                    copy_state[i].append(-1)
+                elif self.state[i][j] == -1:
+                    copy_state[i].append(1)
+                else:
+                    copy_state[i].append(0)
+        
+        return np.array(copy_state)
+    
+    def get_state_flipped_flattened(self):
+        return self.get_state_flipped().reshape((1, 9))
 
     def get_state_flattened(self):
-        return self.state.reshape((1, 9))
+        copy_state = copy.deepcopy(self.state)
+        return copy_state.reshape((1, 9))
     
     def print_state(self):
         for i in range(3):

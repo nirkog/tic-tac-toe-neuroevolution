@@ -3,14 +3,23 @@ import pickle
 from operator import attrgetter, itemgetter
 import matplotlib.pyplot as plt
 import sys
+import threading
 
 from Board import *
 from Player import *
 from RandomAI import *
+from GoodAI import *
 
-NUM_PLAYERS = 100
+
+NUM_PLAYERS = 50
 ITERATIONS = 100
-GAMES_EACH_ROUND = 100
+RANDOM_WIN_SCORE = 1
+RANDOM_TIE_SCORE = 0
+#SMART_WIN_SCORE = 100
+SMART_TIE_SCORE = 35
+GAMES_EACH_ROUND_RANDOM = 90
+GAMES_EACH_ROUND_SMART = 1
+BEST_SCORE_POSSIBLE = GAMES_EACH_ROUND_RANDOM * RANDOM_WIN_SCORE + GAMES_EACH_ROUND_SMART * SMART_TIE_SCORE
 MUTATION_CHANCE = 0.035
 
 players = []
@@ -26,7 +35,9 @@ def compete_players():
 
         player2 = RandomAI('O')
 
-        for j in range(GAMES_EACH_ROUND):
+        ai_type = 'rand'
+
+        for j in range(GAMES_EACH_ROUND_RANDOM + GAMES_EACH_ROUND_SMART):
             while not board.check_for_win() and not board.is_full():
                 if turn == 1:
                     player1.play(board)
@@ -36,9 +47,19 @@ def compete_players():
                     turn = 1
             
             if board.is_full():
-                players[i].score += 0.25
+                if ai_type == 'rand': 
+                    players[i].score += RANDOM_TIE_SCORE
+                elif ai_type == 'good': 
+                    players[i].score += SMART_TIE_SCORE
+                    #print(i)
+                    #print('awesome')
             elif board.check_for_win() == 'X':
-                players[i].score += 1
+                if ai_type == 'rand': players[i].score += RANDOM_WIN_SCORE
+                # elif ai_type == 'good': players[i].score += SMART_WIN_SCORE
+            
+            if j == GAMES_EACH_ROUND_RANDOM - 1:
+                player2 = GoodAI('O')
+                ai_type = 'good'
             
             board.clear()
 
@@ -131,9 +152,9 @@ def main():
         end_time = time.process_time()
         elapsed_time = end_time - start_time
 
-        print("ITERATION NUMBER " + str(i + 1) + " TOOK " + str(elapsed_time) + " SECONDS. BEST SCORE WAS " + str(best_player.score) + "/" + str(GAMES_EACH_ROUND) + " FROM GENERATION " + str(best_generation))
+        print("ITERATION NUMBER " + str(i + 1) + " TOOK " + str(elapsed_time) + " SECONDS. BEST SCORE WAS " + str(best_player.score) + "/" + str(BEST_SCORE_POSSIBLE) + " FROM GENERATION " + str(best_generation))
     
-    print("BEST PLAYER SCORE " + str(best_player.score) + "/" + str(GAMES_EACH_ROUND))
+    print("BEST PLAYER SCORE " + str(best_player.score) + "/" + str(BEST_SCORE_POSSIBLE))
 
     with open('save.pickle', 'wb') as save_file:
         pickle.dump(best_player, save_file)

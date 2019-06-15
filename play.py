@@ -29,8 +29,6 @@ while not board.check_for_win() and not board.is_full():
             pos.append(int(pos_str[0]) - 1)
             pos.append(int(ord(pos_str[1]) - ord('a')))
 
-            print(pos)
-
             if board.is_empty(pos):
                 pos_valid = True
 
