@@ -11,14 +11,13 @@ from RandomAI import *
 from GoodAI import *
 
 
-NUM_PLAYERS = 50
+NUM_PLAYERS = 100
 ITERATIONS = 100
 RANDOM_WIN_SCORE = 1
 RANDOM_TIE_SCORE = 0
-#SMART_WIN_SCORE = 100
-SMART_TIE_SCORE = 35
-GAMES_EACH_ROUND_RANDOM = 90
-GAMES_EACH_ROUND_SMART = 1
+SMART_TIE_SCORE = 10
+GAMES_EACH_ROUND_RANDOM = 150
+GAMES_EACH_ROUND_SMART = 0
 BEST_SCORE_POSSIBLE = GAMES_EACH_ROUND_RANDOM * RANDOM_WIN_SCORE + GAMES_EACH_ROUND_SMART * SMART_TIE_SCORE
 MUTATION_CHANCE = 0.035
 
@@ -36,14 +35,23 @@ def compete_players():
         player2 = RandomAI('O')
 
         ai_type = 'rand'
+        good_index = -1
 
         for j in range(GAMES_EACH_ROUND_RANDOM + GAMES_EACH_ROUND_SMART):
+            if ai_type == 'good':
+                good_index += 1
+                turn = 1
+
             while not board.check_for_win() and not board.is_full():
                 if turn == 1:
                     player1.play(board)
                     turn = 2
                 elif turn == 2:
-                    player2.play(board)
+                    if ai_type == 'rand':
+                        player2.play(board)
+                    elif ai_type == 'good':
+                        player2.play(board, index=good_index)
+
                     turn = 1
             
             if board.is_full():
@@ -55,11 +63,14 @@ def compete_players():
                     #print('awesome')
             elif board.check_for_win() == 'X':
                 if ai_type == 'rand': players[i].score += RANDOM_WIN_SCORE
-                # elif ai_type == 'good': players[i].score += SMART_WIN_SCORE
+                elif ai_type == 'good': board.print_state()
+            #elif ai_type == 'good':
+                #board.print_state()
             
             if j == GAMES_EACH_ROUND_RANDOM - 1:
                 player2 = GoodAI('O')
                 ai_type = 'good'
+                turn = 1
             
             board.clear()
 
@@ -115,8 +126,20 @@ def pick_best_player():
     
     return best
 
+def get_average_score():
+    total = 0
+
+    for i in range(NUM_PLAYERS):
+        total += players[i].score
+    
+    return total / NUM_PLAYERS
+
 def main():
     global players
+
+    iterations = []
+    average_score = []
+    best_score = []
 
     best_player = Player()
     best_player.score = 0
@@ -142,6 +165,11 @@ def main():
         compete_players()
 
         generation_best = pick_best_player()
+
+        iterations.append(i)
+        average_score.append(get_average_score())
+        best_score.append(generation_best.score)
+
         if generation_best.score > best_player.score:
             best_player = Player(generation_best.get_nn())
             best_player.score = generation_best.score
@@ -155,6 +183,10 @@ def main():
         print("ITERATION NUMBER " + str(i + 1) + " TOOK " + str(elapsed_time) + " SECONDS. BEST SCORE WAS " + str(best_player.score) + "/" + str(BEST_SCORE_POSSIBLE) + " FROM GENERATION " + str(best_generation))
     
     print("BEST PLAYER SCORE " + str(best_player.score) + "/" + str(BEST_SCORE_POSSIBLE))
+
+    plt.plot(iterations, average_score, 'r-')
+    plt.plot(iterations, best_score, 'b-')
+    plt.show()
 
     with open('save.pickle', 'wb') as save_file:
         pickle.dump(best_player, save_file)

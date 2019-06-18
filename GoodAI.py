@@ -76,16 +76,32 @@ class GoodAI:
         self.sign = sign
         self.opp_sign = 'X' if self.sign == 'O' else 'O'
     
-    def play(self, board):
+    def play(self, board, index=None):
         if self.sign == 'O':
             state = board.get_state_flipped()
         else:
             state = board.get_state()
 
-        depth = len(empty_cells(state))
+        empty = empty_cells(state)
+        depth = len(empty)
         
         if depth == 9:
             best_move = (random.randint(0, 2), random.randint(0, 2))
+        elif depth == 8 and not [1, 1] in empty:
+            corners = [[0, 0], [0, 2], [2, 0], [2, 2]]
+            empty_corners = []
+            
+            for corner in corners:
+                if corner in empty:
+                   empty_corners.append(corner)
+
+            if index == None:
+                index = random.randint(0, len(empty_corners) - 1)
+                best_move = empty_corners[index]
+            else:
+                best_move = empty_corners[min(index, len(empty_corners) - 1)]
+        elif depth == 8:
+            best_move = [1, 1]
         else:
             best_move = minimax(state, depth, COMP)
 

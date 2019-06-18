@@ -3,6 +3,7 @@ import pickle
 
 from Player import *
 from Board import *
+from GoodAI import *
 
 file_name = sys.argv[1]
 
@@ -10,6 +11,7 @@ save_file = open(file_name, 'rb')
 player = pickle.load(save_file)
 save_file.close()
 
+#player = GoodAI('X')
 board = Board()
 player.set_sign('X')
 turn = 1
